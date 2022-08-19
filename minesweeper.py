@@ -26,10 +26,8 @@ clock_flag = False
 game_over_flag = 0
 no_mine_array = []
 play_sound = False
-running = True
 total_mines = 99
 flag_number = total_mines
-win_flag = 0
 
 def place_mine() -> list:
     global array
@@ -375,14 +373,14 @@ def main_game():
                     pygame.draw.rect(screen,[210,210,210],[x,y+1,28,28])
                     flag_map[a-1,b-1]=0
                     two_right_click=1
-                    flag_number=flag_number+1
+                    flag_number += 1
 
                 if right_mouse_flag and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and not chord_flag:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
                     screen.blit (flag_img,(x,y))
                     flag_map[a-1,b-1]=1
-                    flag_number=flag_number-1
+                    flag_number -= 1
             
                 if not right_mouse_flag and flag_map[a-1,b-1]==0 and not chord_flag and cell_status[a-1,b-1]==0:
                     if (a,b) in array:
@@ -424,26 +422,24 @@ def clock():
         screen.blit(time_font,(430,50))
 
 def game_over():
-    global win_flag
     if game_over_flag == 1:
         game_over_font = font.render("GAME OVER", True, (0, 0, 0))
         screen.blit(game_over_font, (360, 85))
     else:  
         you_win_font = font.render("YOU WIN", True, (0, 0, 0))
         screen.blit(you_win_font, (390, 85))
-        win_flag += 1
-        if win_flag and play_sound:
+        if play_sound:
             mixer.Sound('win.wav').play()
 
 mouse_flag=0
 start_time=0
 screen.fill((210,210,210))
 draw_grid()
-while running:
+while True:
     for event in pygame.event.get():
         mouse_presses=pygame.mouse.get_pressed()
         if event.type==pygame.QUIT:
-            running=False
+            raise Exception
         if event.type==pygame.MOUSEBUTTONDOWN:
             if (event.button==1 and mouse_presses[2]) or (event.button==3 and mouse_presses[0]):
                 mouse_pos=pygame.mouse.get_pos()
