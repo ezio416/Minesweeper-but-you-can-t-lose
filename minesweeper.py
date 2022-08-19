@@ -21,7 +21,7 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 900, 600
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 array = []
-chord_flag = 0
+chord_flag = False
 clock_flag = 0
 game_over_flag = 0
 no_mine_array = []
@@ -404,9 +404,9 @@ def main_game():
                             cell_status[a-1,b-1]=1
                             floodfill(a,b)
                 
-                if chord_flag==1 and flag_map[a-1,b-1]==0:
+                if chord_flag and flag_map[a-1,b-1]==0:
                     chording(a,b)
-                    chord_flag=0
+                    chord_flag = False
                 mouse_pos=(0,0)
             pygame.draw.rect(screen,[210,210,210],[420,10,73,30])
             pygame.draw.rect(screen,[0,0,0],[420,10,73,30],2)
@@ -447,7 +447,7 @@ while running:
         if event.type==pygame.MOUSEBUTTONDOWN:
             if (event.button==1 and mouse_presses[2]) or (event.button==3 and mouse_presses[0]):
                 mouse_pos=pygame.mouse.get_pos()
-                chord_flag=1
+                chord_flag = True
                 if not game_over_flag and not clock_flag:
                     main_game()
             elif mouse_presses[0] and not chord_flag:
@@ -464,7 +464,7 @@ while running:
                 if not game_over_flag and not clock_flag:
                     main_game()
     right_mouse_flag=0
-    chord_flag=0
+    chord_flag = False
     if mouse_flag>=1:
         clock()
     if clock_flag==1:
