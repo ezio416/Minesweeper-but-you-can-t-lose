@@ -79,7 +79,7 @@ def chording(a,b):
     mine_check(a, b)
     if flag1 == flag:
         if a > 1 and b > 1:
-            if not (flag_map[a - 2, b - 2] and (a - 1, b - 1) in array):
+            if not (flag_map[a - 2, b - 2] or (a - 1, b - 1) in array):
                 mine_check(a - 1, b - 1)
                 if not flag:
                     pygame.draw.rect(screen, [180] * 3, [(a - 2) * 30, 120 + ((b - 2) * 30), 28, 28])
@@ -92,24 +92,24 @@ def chording(a,b):
                 cell_status[a - 2, b - 2] = 1
                 mine_shift(a - 1, b - 1)
                 #blowup((a-2)*30,120+(b-2)*30)
-        if a>1:
-            if flag_map[a-2,b-1]==0 and (a-1,b) not in array:
-                mine_check(a-1,b)
-                if flag==0:
-                    pygame.draw.rect(screen,[180] * 3,[(a-2)*30,120+((b-1)*30),28,28])
-                    cell_status[a-2,b-1]=1
-                    floodfill(a-1,b)
+        if a > 1:
+            if not (flag_map[a - 2, b - 1] or (a - 1, b) in array):
+                mine_check(a - 1, b)
+                if not flag:
+                    pygame.draw.rect(screen, [180] * 3, [(a - 2) * 30, 120 + ((b - 1) * 30), 28, 28])
+                    cell_status[a - 2, b - 1] = 1
+                    floodfill(a - 1, b)
                 else:
-                    mine_render((a-2)*30,120+(b-1)*30)
-                    cell_status[a-2,b-1]=1
-            if flag_map[a-2,b-1]==0 and (a-1,b) in array:
-                cell_status[a-2,b-1]=1
-                mine_shift(a-1,b)
+                    mine_render((a - 2) * 30, 120 + (b - 1) * 30)
+                    cell_status[a - 2, b - 1] = 1
+            if not flag_map[a - 2, b - 1] and (a - 1, b) in array:
+                cell_status[a - 2, b - 1] = 1
+                mine_shift(a - 1, b)
                 #blowup((a-2)*30,120+(b-1)*30)
         if b<16:
             if flag_map[a-1,b]==0 and (a,b+1) not in array:
                 mine_check(a,b+1)
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b)*30),28,28])
                     cell_status[a-1,b]=1
                     floodfill(a,b+1)
@@ -123,7 +123,7 @@ def chording(a,b):
         if a<30 and b<16:
             if flag_map[a,b]==0 and (a+1,b+1) not in array:
                 mine_check(a+1,b+1)
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a)*30,120+((b)*30),28,28])
                     cell_status[a,b]=1
                     floodfill(a+1,b+1) 
@@ -137,7 +137,7 @@ def chording(a,b):
         if a<30:
             if flag_map[a,b-1]==0 and (a+1,b) not in array:
                 mine_check(a+1,b)
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a)*30,120+((b-1)*30),28,28])
                     cell_status[a,b-1]=1
                     floodfill(a+1,b) 
@@ -148,11 +148,10 @@ def chording(a,b):
                 cell_status[a,b-1]=1
                 mine_shift(a+1,b)
                 #blowup((a)*30,120+(b-1)*30)
-
         if b>1:
             if flag_map[a-1,b-2]==0 and (a,b-1) not in array:
                 mine_check(a,b-1)
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-2)*30),28,28])
                     cell_status[a-1,b-2]=1
                     floodfill(a,b-1)
@@ -166,7 +165,7 @@ def chording(a,b):
         if a>1 and b<16:
             if flag_map[a-2,b]==0 and (a-1,b+1) not in array:
                 mine_check(a-1,b+1)
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a-2)*30,120+((b)*30),28,28])
                     cell_status[a-2,b]=1
                     floodfill(a-1,b+1)
@@ -180,7 +179,7 @@ def chording(a,b):
         if a<30 and b>1:
             if flag_map[a,b-2]==0 and (a+1,b-1) not in array:
                 mine_check(a+1,b-1)
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a)*30,120+((b-2)*30),28,28])
                     cell_status[a,b-2]=1
                     floodfill(a+1,b-1)
@@ -218,7 +217,7 @@ flag_map=np.zeros([30,16],dtype=int)
 def floodfill(k,l):
     if k+1<=30 and l>=1 and k+1>=1 and l<=16:
         mine_check(k+1,l)
-        if flag==0 and cell_status[k,l-1]==0 and flag_map[k,l-1]==0:
+        if not flag and cell_status[k,l-1]==0 and flag_map[k,l-1]==0:
             pygame.draw.rect(screen,[180] * 3,[(k)*30,120+((l-1)*30),28,28])
             cell_status[k,l-1]=1
             floodfill(k+1,l)
@@ -227,7 +226,7 @@ def floodfill(k,l):
             cell_status[k,l-1]=1
     if k>=1 and k<=30 and l+1>=1 and l+1<=16:
         mine_check(k,l+1)
-        if flag==0 and cell_status[k-1,l]==0 and flag_map[k-1,l]==0:
+        if not flag and cell_status[k-1,l]==0 and flag_map[k-1,l]==0:
             pygame.draw.rect(screen,[180] * 3,[(k-1)*30,120+((l)*30),28,28])
             cell_status[k-1,l]=1
             floodfill(k,l+1)
@@ -236,7 +235,7 @@ def floodfill(k,l):
             cell_status[k-1,l]=1
     if k+1>=1 and k+1<=30 and l+1>=1 and l+1<=16:
         mine_check(k+1,l+1)
-        if flag==0 and cell_status[k,l]==0 and flag_map[k,l]==0:
+        if not flag and cell_status[k,l]==0 and flag_map[k,l]==0:
             pygame.draw.rect(screen,[180] * 3,[(k)*30,120+((l)*30),28,28])
             cell_status[k,l]=1
             floodfill(k+1,l+1)
@@ -245,7 +244,7 @@ def floodfill(k,l):
             cell_status[k,l]=1
     if k+1>=1 and k+1<=30 and l-1>=1 and l-1<=16:
         mine_check(k+1,l-1)
-        if flag==0 and cell_status[k,l-2]==0 and flag_map[k,l-2]==0:
+        if not flag and cell_status[k,l-2]==0 and flag_map[k,l-2]==0:
             pygame.draw.rect(screen,[180] * 3,[(k)*30,120+((l-2)*30),28,28])
             cell_status[k,l-2]=1
             floodfill(k+1,l-1) 
@@ -254,7 +253,7 @@ def floodfill(k,l):
            cell_status[k,l-2]=1
     if k-1>=1 and k-1<=30 and l>=1 and l<=16:
         mine_check(k-1,l)
-        if flag==0 and cell_status[k-2,l-1]==0 and flag_map[k-2,l-1]==0:
+        if not flag and cell_status[k-2,l-1]==0 and flag_map[k-2,l-1]==0:
             pygame.draw.rect(screen,[180] * 3,[(k-2)*30,120+((l-1)*30),28,28])
             cell_status[k-2,l-1]=1
             floodfill(k-1,l) 
@@ -263,7 +262,7 @@ def floodfill(k,l):
             cell_status[k-2,l-1]=1  
     if k>=1 and k<=30 and l-1>=1 and l-1<=16:
         mine_check(k,l-1)
-        if flag==0 and cell_status[k-1,l-2]==0 and flag_map[k-1,l-2]==0:
+        if not flag and cell_status[k-1,l-2]==0 and flag_map[k-1,l-2]==0:
             pygame.draw.rect(screen,[180] * 3,[(k-1)*30,120+((l-2)*30),28,28])
             cell_status[k-1,l-2]=1
             floodfill(k,l-1)
@@ -272,7 +271,7 @@ def floodfill(k,l):
             cell_status[k-1,l-2]=1
     if k-1>=1 and k-1<=30 and l-1>=1 and l-1<=16:
         mine_check(k-1,l-1)
-        if flag==0 and cell_status[k-2,l-2]==0 and flag_map[k-2,l-2]==0:
+        if not flag and cell_status[k-2,l-2]==0 and flag_map[k-2,l-2]==0:
             pygame.draw.rect(screen,[180] * 3,[(k-2)*30,120+((l-2)*30),28,28])
             cell_status[k-2,l-2]=1
             floodfill(k-1,l-1)
@@ -281,7 +280,7 @@ def floodfill(k,l):
             cell_status[k-2,l-2]=1
     if k-1>=1 and k-1<=30 and l+1>=1 and l+1<=16:
         mine_check(k-1,l+1)
-        if flag==0 and cell_status[k-2,l]==0 and flag_map[k-2,l]==0:
+        if not flag and cell_status[k-2,l]==0 and flag_map[k-2,l]==0:
             pygame.draw.rect(screen,[180] * 3,[(k-2)*30,120+((l)*30),28,28])
             cell_status[k-2,l]=1
             floodfill(k-1,l+1)
@@ -341,7 +340,7 @@ def board_update():
             if cell_status[a-1,b-1]==1:
                 mine_check(a,b)
                 board_config[b-1,a-1]=flag
-                if flag==0:
+                if not flag:
                     pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-1)*30),28,28])
                 else:
                     mine_render((a-1)*30,120+((b-1)*30))
@@ -397,7 +396,7 @@ def main_game():
                                 mixer.Sound('click.wav').play()
                             mine_render(x,y)
                             cell_status[a-1,b-1]=1
-                        if flag==0:
+                        if not flag:
                             if not cell_status[a - 1, b - 1] and play_sound:
                                 mixer.Sound('empty_cell.wav').play()
                             pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-1)*30),28,28])
