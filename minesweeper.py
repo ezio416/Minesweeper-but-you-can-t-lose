@@ -78,11 +78,12 @@ def chording(a,b):
         flag1 += 1 if flag_map[a - 2, b - 1] else 0
     mine_check(a, b)
     if flag1 == flag:
+        draw = lambda var_a, var_b: pygame.draw.rect(screen, [180] * 3, [(var_a) * 30, 120 + ((var_b) * 30), 28, 28])
         if a > 1 and b > 1:
             if not (flag_map[a - 2, b - 2] or (a - 1, b - 1) in array):
                 mine_check(a - 1, b - 1)
                 if not flag:
-                    pygame.draw.rect(screen, [180] * 3, [(a - 2) * 30, 120 + ((b - 2) * 30), 28, 28])
+                    draw(a - 2, b - 2)
                     cell_status[a - 2, b - 2] = 1
                     floodfill(a - 1, b - 1)
                 else:
@@ -96,7 +97,7 @@ def chording(a,b):
             if not (flag_map[a - 2, b - 1] or (a - 1, b) in array):
                 mine_check(a - 1, b)
                 if not flag:
-                    pygame.draw.rect(screen, [180] * 3, [(a - 2) * 30, 120 + ((b - 1) * 30), 28, 28])
+                    draw(a - 2, b - 1)
                     cell_status[a - 2, b - 1] = 1
                     floodfill(a - 1, b)
                 else:
@@ -110,7 +111,7 @@ def chording(a,b):
             if flag_map[a-1,b]==0 and (a,b+1) not in array:
                 mine_check(a,b+1)
                 if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b)*30),28,28])
+                    draw(a - 1, b)
                     cell_status[a-1,b]=1
                     floodfill(a,b+1)
                 else:
@@ -124,7 +125,7 @@ def chording(a,b):
             if flag_map[a,b]==0 and (a+1,b+1) not in array:
                 mine_check(a+1,b+1)
                 if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a)*30,120+((b)*30),28,28])
+                    draw(a, b)
                     cell_status[a,b]=1
                     floodfill(a+1,b+1) 
                 else:
@@ -138,7 +139,7 @@ def chording(a,b):
             if flag_map[a,b-1]==0 and (a+1,b) not in array:
                 mine_check(a+1,b)
                 if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a)*30,120+((b-1)*30),28,28])
+                    draw(a, b - 1)
                     cell_status[a,b-1]=1
                     floodfill(a+1,b) 
                 else:
@@ -152,7 +153,7 @@ def chording(a,b):
             if flag_map[a-1,b-2]==0 and (a,b-1) not in array:
                 mine_check(a,b-1)
                 if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-2)*30),28,28])
+                    draw(a - 1, b - 2)
                     cell_status[a-1,b-2]=1
                     floodfill(a,b-1)
                 else:
@@ -166,7 +167,7 @@ def chording(a,b):
             if flag_map[a-2,b]==0 and (a-1,b+1) not in array:
                 mine_check(a-1,b+1)
                 if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a-2)*30,120+((b)*30),28,28])
+                    draw(a - 2, b)
                     cell_status[a-2,b]=1
                     floodfill(a-1,b+1)
                 else:
@@ -180,7 +181,7 @@ def chording(a,b):
             if flag_map[a,b-2]==0 and (a+1,b-1) not in array:
                 mine_check(a+1,b-1)
                 if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a)*30,120+((b-2)*30),28,28])
+                    draw(a, b - 2)
                     cell_status[a,b-2]=1
                     floodfill(a+1,b-1)
                 else:
