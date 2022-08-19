@@ -1,51 +1,63 @@
-import pygame
-import random
+'''
+Ezio416 fork of "Minesweeper but you can't lose" by Thebrowndot
+Forked:   2022-08-18
+Modified: 2022-08-18
+'''
 import numpy as np
+import random
 import time
+
+import pygame
 from pygame import mixer
+
 pygame.init()
-pygame.display.set_caption("Minesweeper")
-icon=pygame.image.load('icon.png')
+pygame.display.set_caption('Minesweeper')
+icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
-mineimg=pygame.image.load('mine.png')
-font=pygame.font.Font('freesansbold.ttf',29)
-flagimg=pygame.image.load('flag.png')
-total_mines=99
-WINDOW_WIDTH,WINDOW_HEIGHT=900,600
-screen=pygame.display.set_mode((WINDOW_WIDTH,WINDOW_HEIGHT))
-clock_flag=0
-chord_flag=0
-win_flag=0
-game_over_flag=0
-running=True
-array=[]
-no_mine_array=[]
-flag_number=total_mines
-def place_mine():
+mineimg = pygame.image.load('mine.png')
+font = pygame.font.Font('freesansbold.ttf', 29)
+flagimg = pygame.image.load('flag.png')
+WINDOW_WIDTH, WINDOW_HEIGHT = 900, 600
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+array = []
+chord_flag = 0
+clock_flag = 0
+game_over_flag = 0
+no_mine_array = []
+play_sound = False
+running = True
+total_mines = 99
+flag_number = total_mines
+win_flag = 0
+
+def place_mine() -> list:
     global array
-    for i in range(0,total_mines):
-        (minex,miney)=(random.randint(1,30),random.randint(1,16))
-        if i==0:
-            new_array=no_mine_array
-        else:
-            new_array=no_mine_array+array
-        while (minex,miney) in new_array: 
-                (minex,miney)=(random.randint(1,30),random.randint(1,16))
-        array.append((minex,miney))
+    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
+    for i in range(total_mines):
+        xytuple = rand()
+        new_array = no_mine_array + array if i else no_mine_array
+        while xytuple in new_array: 
+            xytuple = rand()
+        array.append(xytuple)
     return array
-def drawgrid():
+
+def draw_grid() -> None:
     blockSize = 30
     for x in range(0, WINDOW_WIDTH, blockSize):
         for y in range(120, WINDOW_HEIGHT, blockSize):
             rect = pygame.Rect(x, y, blockSize, blockSize)
-            pygame.draw.rect(screen,(255,255,255), rect, 1)
-def mine_shifting(a,b):
+            pygame.draw.rect(screen, (255, 255, 255), rect, 1)
+
+def mine_shift(a, b) -> None:
     global array
     array.remove((a,b))
-    (minex,miney)=(random.randint(1,30),random.randint(1,16))
-    while cell_status[minex-1,miney-1]==1 or (minex,miney) in array:
-        (minex,miney)=(random.randint(1,30),random.randint(1,16))
-    array.append((minex,miney))
+    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
+    (mine_x, mine_y) = rand()
+    while cell_status[mine_x - 1, mine_y - 1] == 1 or (mine_x, mine_y) in array:
+        (mine_x, mine_y) = rand()
+    array.append((mine_x, mine_y))
+
 def chording(a,b):
     flag1=0
     if a>1 and b>1:
@@ -86,7 +98,7 @@ def chording(a,b):
                     cell_status[a-2,b-2]=1
             if flag_map[a-2,b-2]==0 and (a-1,b-1) in array:
                 cell_status[a-2,b-2]=1
-                mine_shifting(a-1,b-1)
+                mine_shift(a-1,b-1)
                 #blowup((a-2)*30,120+(b-2)*30)
         if a>1:
             if flag_map[a-2,b-1]==0 and (a-1,b) not in array:
@@ -100,7 +112,7 @@ def chording(a,b):
                     cell_status[a-2,b-1]=1
             if flag_map[a-2,b-1]==0 and (a-1,b) in array:
                 cell_status[a-2,b-1]=1
-                mine_shifting(a-1,b)
+                mine_shift(a-1,b)
                 #blowup((a-2)*30,120+(b-1)*30)
         if b<16:
             if flag_map[a-1,b]==0 and (a,b+1) not in array:
@@ -114,7 +126,7 @@ def chording(a,b):
                     cell_status[a-1,b]=1
             if flag_map[a-1,b]==0 and (a,b+1) in array:
                 cell_status[a-1,b]=1
-                mine_shifting(a,b+1)
+                mine_shift(a,b+1)
                 #blowup((a-1)*30,120+(b)*30)
         if a<30 and b<16:
             if flag_map[a,b]==0 and (a+1,b+1) not in array:
@@ -128,7 +140,7 @@ def chording(a,b):
                     cell_status[a,b]=1
             if flag_map[a,b]==0 and (a+1,b+1) in array:
                 cell_status[a,b]=1
-                mine_shifting(a+1,b+1)
+                mine_shift(a+1,b+1)
                 #blowup((a)*30,120+(b)*30)
         if a<30:
             if flag_map[a,b-1]==0 and (a+1,b) not in array:
@@ -142,7 +154,7 @@ def chording(a,b):
                     cell_status[a,b-1]=1
             if flag_map[a,b-1]==0 and (a+1,b) in array:
                 cell_status[a,b-1]=1
-                mine_shifting(a+1,b)
+                mine_shift(a+1,b)
                 #blowup((a)*30,120+(b-1)*30)
 
         if b>1:
@@ -157,7 +169,7 @@ def chording(a,b):
                     cell_status[a-1,b-2]=1
             if flag_map[a-1,b-2]==0 and (a,b-1) in array:
                 cell_status[a-1,b-2]=1
-                mine_shifting(a,b-1)
+                mine_shift(a,b-1)
                 #blowup((a-1)*30,120+(b-2)*30)
         if a>1 and b<16:
             if flag_map[a-2,b]==0 and (a-1,b+1) not in array:
@@ -171,7 +183,7 @@ def chording(a,b):
                     cell_status[a-2,b]=1
             if flag_map[a-2,b]==0 and (a-1,b+1) in array:
                 cell_status[a-2,b]=1
-                mine_shifting(a-1,b+1)
+                mine_shift(a-1,b+1)
                 #blowup((a-2)*30,120+(b)*30)
         if a<30 and b>1:
             if flag_map[a,b-2]==0 and (a+1,b-1) not in array:
@@ -185,29 +197,30 @@ def chording(a,b):
                     cell_status[a,b-2]=1
             if flag_map[a,b-2]==0 and (a+1,b-1) in array:
                 cell_status[a,b-2]=1
-                mine_shifting(a+1,b-1)
+                mine_shift(a+1,b-1)
                 #blowup((a)*30,120+(b-2)*30)
-        chord_sound=mixer.Sound('chord.wav')
-        chord_sound.play()
+        if play_sound:
+            mixer.Sound('chord.wav').play()
+
 def mine_check(a,b):
     global flag
     flag=0
-    if (a-1,b-1) in array:
-        flag=flag+1
-    if (a-1,b+1) in array:
-        flag=flag+1
-    if (a+1,b+1) in array:
-        flag=flag+1
-    if (a+1,b-1) in array:
-        flag=flag+1
-    if (a,b-1) in array:
-        flag=flag+1
-    if (a,b+1) in array:
-        flag=flag+1
-    if (a+1,b) in array:
-        flag=flag+1
-    if (a-1,b) in array:
-        flag=flag+1
+    if (a - 1, b - 1) in array:
+        flag += 1
+    if (a - 1, b + 1) in array:
+        flag += 1
+    if (a + 1, b + 1) in array:
+        flag += 1
+    if (a + 1, b - 1) in array:
+        flag += 1
+    if (a, b - 1) in array:
+        flag += 1
+    if (a, b + 1) in array:
+        flag += 1
+    if (a + 1, b) in array:
+        flag += 1
+    if (a - 1, b) in array:
+        flag += 1
 cell_status=np.zeros([30,16],dtype=int)
 flag_map=np.zeros([30,16],dtype=int)
 def floodfill(k,l):
@@ -325,8 +338,9 @@ def blowup(x,y):
     clock_flag=1
     flag=10
     game_over_flag=1
-    blast_sound=mixer.Sound('blast.wav')
-    blast_sound.play()
+    if play_sound:
+        mixer.Sound('blast.wav').play()
+
 board_config=np.zeros([16,30],dtype=int)
 def board_update():
     global flag
@@ -364,17 +378,16 @@ def main_game():
                     mouse_flag=mouse_flag+1
                 two_right_click=0
                 if right_mouse_flag==1 and flag_map[a-1,b-1]==1 and chord_flag==0:
-                    flag_sound=mixer.Sound('flag.wav')
-                    flag_sound.play()
+                    if play_sound:
+                        mixer.Sound('flag.wav').play()
                     pygame.draw.rect(screen,[210,210,210],[x,y+1,28,28])
                     flag_map[a-1,b-1]=0
                     two_right_click=1
                     flag_number=flag_number+1
 
-
                 if right_mouse_flag==1 and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and chord_flag==0:
-                    flag_sound=mixer.Sound('flag.wav')
-                    flag_sound.play()
+                    if play_sound:
+                        mixer.Sound('flag.wav').play()
                     screen.blit (flagimg,(x,y))
                     flag_map[a-1,b-1]=1
                     flag_number=flag_number-1
@@ -382,21 +395,19 @@ def main_game():
                 if right_mouse_flag!=1 and flag_map[a-1,b-1]==0 and chord_flag==0 and cell_status[a-1,b-1]==0:
                     if (a,b) in array:
                         cell_status[a-1,b-1]=1
-                        mine_shifting(a,b)
+                        mine_shift(a,b)
                         #blowup(x,y)
                     else: 
                         mine_check(a,b)
                         
                         if flag!=0 and flag!=10:
-                            if cell_status[a-1,b-1]==0:
-                                click_sound=mixer.Sound('click.wav')
-                                click_sound.play()
+                            if not cell_status[a - 1, b - 1] and play_sound:
+                                mixer.Sound('click.wav').play()
                             mine_render(x,y)
                             cell_status[a-1,b-1]=1
                         if flag==0:
-                            if cell_status[a-1,b-1]==0:
-                                empty_cell=mixer.Sound('empty_cell.wav')
-                                empty_cell.play()
+                            if not cell_status[a - 1, b - 1] and play_sound:
+                                mixer.Sound('empty_cell.wav').play()
                             pygame.draw.rect(screen,[180,180,180],[(a-1)*30,120+((b-1)*30),28,28])
                             cell_status[a-1,b-1]=1
                             floodfill(a,b)
@@ -419,23 +430,23 @@ def clock():
         pygame.draw.rect(screen,[0,0,0],[428,50,57,28],2)
         time_font=font.render(str("%03d"%(time.time()-start_time)),True,(255,0,0))
         screen.blit(time_font,(430,50))
+
 def game_over():
     global win_flag
-    if game_over_flag==1:
-        game_over_font=font.render("GAME OVER",True,(0,0,0))
-        screen.blit(game_over_font,(360,85))
+    if game_over_flag == 1:
+        game_over_font = font.render("GAME OVER", True, (0, 0, 0))
+        screen.blit(game_over_font, (360, 85))
     else:  
-        you_win_font=font.render("YOU WIN",True,(0,0,0))
-        screen.blit(you_win_font,(390,85))
-        win_flag+=1
-        if win_flag==1:
-                winner_sound=mixer.Sound('win.wav')
-                winner_sound.play()
+        you_win_font = font.render("YOU WIN", True, (0, 0, 0))
+        screen.blit(you_win_font, (390, 85))
+        win_flag += 1
+        if win_flag and play_sound:
+            mixer.Sound('win.wav').play()
 
 mouse_flag=0
 start_time=0
 screen.fill((210,210,210))
-drawgrid()
+draw_grid()
 while running:
     
     for event in pygame.event.get():
