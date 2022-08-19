@@ -14,9 +14,9 @@ pygame.init()
 pygame.display.set_caption('Minesweeper')
 icon = pygame.image.load('icon.png')
 pygame.display.set_icon(icon)
-mineimg = pygame.image.load('mine.png')
+mine_img = pygame.image.load('mine.png')
 font = pygame.font.Font('freesansbold.ttf', 29)
-flagimg = pygame.image.load('flag.png')
+flag_img = pygame.image.load('flag.png')
 WINDOW_WIDTH, WINDOW_HEIGHT = 900, 600
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
@@ -51,40 +51,33 @@ def draw_grid() -> None:
 
 def mine_shift(a, b) -> None:
     global array
-    array.remove((a,b))
+    array.remove((a, b))
     rand = lambda: (random.randint(1, 30), random.randint(1, 16))
     (mine_x, mine_y) = rand()
-    while cell_status[mine_x - 1, mine_y - 1] == 1 or (mine_x, mine_y) in array:
+    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
         (mine_x, mine_y) = rand()
     array.append((mine_x, mine_y))
 
 def chording(a,b):
-    flag1=0
-    if a>1 and b>1:
-        if flag_map[a-2,b-2]==1:
-            flag1=flag1+1
-    if a>1 and b<16:
-        if flag_map[a-2,b]==1:
-            flag1=flag1+1
-    if a<30 and b<16:
-        if flag_map[a,b]==1:
-            flag1=flag1+1
-    if a<30 and b>1:
-        if flag_map[a,b-2]==1:
-            flag1=flag1+1
-    if b>1:
-        if flag_map[a-1,b-2]==1:
-            flag1=flag1+1
-    if b<16:
-        if flag_map[a-1,b]==1:
-            flag1=flag1+1
-    if a<30:
-        if flag_map[a,b-1]==1:
-            flag1=flag1+1
-    if a>1:
-        if flag_map[a-2,b-1]==1:
-            flag1=flag1+1
-    mine_check(a,b)
+    flag1 = 0
+    if a > 1 and b > 1:
+        flag1 += 1 if flag_map[a - 2, b - 2] else 0
+    if a > 1 and b < 16:
+        flag1 += 1 if flag_map[a - 2, b] else 0
+    if a < 30 and b < 16:
+        flag1 += 1 if flag_map[a, b] else 0
+    if a < 30 and b > 1:
+        flag1 += 1 if flag_map[a, b - 2] else 0
+    if b > 1:
+        flag1 += 1 if flag_map[a - 1, b - 2] else 0
+    if b < 16:
+        flag1 += 1 if flag_map[a - 1, b] else 0
+    if a < 30:
+        flag1 += 1 if flag_map[a, b - 1] else 0
+    if a > 1:
+        flag1 += 1 if flag_map[a - 2, b - 1] else 0
+    
+    mine_check(a, b)
     if flag1==flag:
         if a>1 and b>1:
             if flag_map[a-2,b-2]==0 and (a-1,b-1) not in array:
@@ -334,7 +327,7 @@ def blowup(x,y):
     global flag
     global game_over_flag
     place_mine()
-    screen.blit(mineimg,(x,y))
+    screen.blit(mine_img,(x,y))
     clock_flag=1
     flag=10
     game_over_flag=1
@@ -388,7 +381,7 @@ def main_game():
                 if right_mouse_flag==1 and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and chord_flag==0:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
-                    screen.blit (flagimg,(x,y))
+                    screen.blit (flag_img,(x,y))
                     flag_map[a-1,b-1]=1
                     flag_number=flag_number-1
             
@@ -418,7 +411,7 @@ def main_game():
                 mouse_pos=(0,0)
             pygame.draw.rect(screen,[210,210,210],[420,10,73,30])
             pygame.draw.rect(screen,[0,0,0],[420,10,73,30],2)
-            screen.blit (flagimg,(420,10))
+            screen.blit (flag_img,(420,10))
             flag_font=font.render(str(flag_number),True,(0,0,0))
             screen.blit(flag_font,(455,11))
 def clock():
