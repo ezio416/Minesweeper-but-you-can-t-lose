@@ -337,15 +337,16 @@ def blowup(x,y):
 board_config=np.zeros([16,30],dtype=int)
 def board_update():
     global flag
-    for a in range(1,31):
-        for b in range(1,17):
-            if cell_status[a-1,b-1]==1:
-                mine_check(a,b)
-                board_config[b-1,a-1]=flag
-                if not flag:
-                    pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-1)*30),28,28])
+    for a in range(1, 31):
+        for b in range(1, 17):
+            if cell_status[a - 1, b - 1] == 1:
+                mine_check(a, b)
+                board_config[b - 1, a - 1] = flag
+                if flag:
+                    mine_render((a - 1) * 30, 120 + ((b - 1) * 30))
                 else:
-                    mine_render((a-1)*30,120+((b-1)*30))
+                    draw_rect(a - 1, b - 1)
+
 def main_game():
     global flag
     global mouse_pos
