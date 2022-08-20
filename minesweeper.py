@@ -29,8 +29,10 @@ is_chord = False
 is_clock = False
 is_gameover = False
 is_mouse = 0
+is_right_mouse = False
 no_mine_array = []
 play_sound = False
+start_time = 0
 total_mines = 99
 flag_count = total_mines
 
@@ -54,7 +56,7 @@ def board_update():
                 mine_check(a, b)
                 board_config[b - 1, a - 1] = flag
                 if flag:
-                    mine_render((a - 1) * 30, 120 + (b - 1) * 30)
+                    mine_render((a - 1) * 30, (b - 1) * 30 + 120)
                 else:
                     draw_rect(a - 1, b - 1)
 
@@ -120,8 +122,7 @@ def clock():
     if not is_clock:
         pygame.draw.rect(screen, [210, 210, 210], [428, 50, 57, 28])
         pygame.draw.rect(screen, [0, 0, 0], [428, 50, 57, 28], 2)
-        time_font=font.render(str('%03d'%(time.time() - start_time)), True, (255, 0, 0))
-        screen.blit(time_font, (430, 50))
+        screen.blit(font.render(str('%03d'%(time.time() - start_time)), True, (255, 0, 0)), (430, 50))
 
 def draw_grid() -> None:
     blockSize = 30
@@ -164,11 +165,9 @@ def floodfill(a, b) -> None:
 
 def game_over():
     if is_gameover:
-        font_ = font.render('GAME OVER', True, (0, 0, 0))
-        screen.blit(font_, (360, 85))
+        screen.blit(font.render('GAME OVER', True, (0, 0, 0)), (360, 85))
     else:
-        font_ = font.render('YOU WIN', True, (0, 0, 0))
-        screen.blit(font_, (390, 85))
+        screen.blit(font.render('YOU WIN', True, (0, 0, 0)), (390, 85))
         if play_sound:
             mixer.Sound('win.wav').play()
 
@@ -186,8 +185,7 @@ def mine_render(x, y):
     for i, tuple_ in enumerate(tuples, 1):
         if flag == i:
             pygame.draw.rect(screen, [180] * 3, [x, y, 28, 28])
-            mine_count = font.render(str(flag), True, tuple_)
-            screen.blit(mine_count, (x + 7.5, y))
+            screen.blit(font.render(str(flag), True, tuple_), (x + 7.5, y))
 
 def mine_shift(a, b) -> None:
     global array
@@ -270,36 +268,34 @@ def game():
                     is_chord = False
                 mouse_pos = (0, 0)
             pygame.draw.rect(screen, [210] * 3,[420, 10, 73, 30])
-            pygame.draw.rect(screen, [0] * 3, [420, 10, 73, 30] ,2)
-            screen.blit (flag_img, (420, 10))
-            flag_font=font.render(str(flag_count), True, (0) * 3)
-            screen.blit(flag_font, (455, 11))
+            pygame.draw.rect(screen, [0] * 3, [420, 10, 73, 30], 2)
+            screen.blit(flag_img, (420, 10))
+            screen.blit(font.render(str(flag_count), True, (0, 0, 0)), (455, 11))
 
-start_time=0
-screen.fill((210,210,210))
+screen.fill((210, 210, 210))
 draw_grid()
 while True:
     for event in pygame.event.get():
-        mouse_presses=pygame.mouse.get_pressed()
-        if event.type==pygame.QUIT:
+        mouse_presses = pygame.mouse.get_pressed()
+        if event.type == pygame.QUIT:
             raise Exception
-        if event.type==pygame.MOUSEBUTTONDOWN:
-            if (event.button==1 and mouse_presses[2]) or (event.button==3 and mouse_presses[0]):
-                mouse_pos=pygame.mouse.get_pos()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if (event.button == 1 and mouse_presses[2]) or (event.button == 3 and mouse_presses[0]):
+                mouse_pos = pygame.mouse.get_pos()
                 is_chord = True
                 if not is_gameover and not is_clock:
                     game()
             elif mouse_presses[0] and not is_chord:
-                mouse_pos=pygame.mouse.get_pos()
-                if mouse_pos[1]>120:
-                    is_mouse=is_mouse+1
-                if is_mouse==1:
-                    start_time=time.time()
+                mouse_pos = pygame.mouse.get_pos()
+                if mouse_pos[1] > 120:
+                    is_mouse += 1
+                if is_mouse == 1:
+                    start_time = time.time()
                 if not is_gameover and not is_clock:
                     game()
             elif mouse_presses[2] and not is_chord:
                 is_right_mouse = True
-                mouse_pos=pygame.mouse.get_pos()
+                mouse_pos = pygame.mouse.get_pos()
                 if not is_gameover and not is_clock:
                     game()
     is_right_mouse = False
