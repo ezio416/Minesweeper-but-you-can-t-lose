@@ -203,12 +203,7 @@ def place_mine() -> None:
         array.append(xytuple)
 def random_pos(): return (random.randint(1, 30), random.randint(1, 16))
 def main():
-    global is_chord
-    global is_gameover
-    global is_mouse
-    global is_right_mouse
-    global mouse_pos
-    global start_time
+    global is_chord, is_gameover, is_mouse, is_right_mouse, mouse_pos, start_time
     screen.fill((210, 210, 210))
     draw_grid()
     while True:
