@@ -10,6 +10,8 @@ import time
 import pygame
 from pygame import mixer
 
+play_sound = False
+
 pygame.init()
 pygame.display.set_caption('Minesweeper')
 icon = pygame.image.load('icon.png')
@@ -31,7 +33,6 @@ is_gameover = False
 is_mouse = 0
 is_right_mouse = False
 no_mine_array = []
-play_sound = False
 start_time = 0
 total_mines = 99
 flag_count = total_mines
@@ -163,50 +164,6 @@ def floodfill(a, b) -> None:
     if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
         floodfill_helper((a - 1, b + 1), (a - 2, b))
 
-def game_over():
-    if is_gameover:
-        screen.blit(font.render('GAME OVER', True, (0, 0, 0)), (360, 85))
-    else:
-        screen.blit(font.render('YOU WIN', True, (0, 0, 0)), (390, 85))
-        if play_sound:
-            mixer.Sound('win.wav').play()
-
-def mine_check(a, b) -> None:
-    global flag
-    flag = 0
-    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
-              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
-    for tuple_ in tuples:
-        flag += 1 if tuple_ in array else 0
-
-def mine_render(x, y):
-    tuples = [(0, 0, 255), (0, 102, 51), (255, 0, 0), (0, 0, 102),
-              (102, 51, 0), (0, 153, 153), (0, 0, 0), (160, 160, 160)]
-    for i, tuple_ in enumerate(tuples, 1):
-        if flag == i:
-            pygame.draw.rect(screen, [180] * 3, [x, y, 28, 28])
-            screen.blit(font.render(str(flag), True, tuple_), (x + 7.5, y))
-
-def mine_shift(a, b) -> None:
-    global array
-    array.remove((a, b))
-    (mine_x, mine_y) = random_pos()
-    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
-        (mine_x, mine_y) = random_pos()
-    array.append((mine_x, mine_y))
-
-def place_mine() -> None:
-    global array
-    for i in range(total_mines):
-        xytuple = random_pos()
-        new_array = no_mine_array + array if i else no_mine_array
-        while xytuple in new_array:
-            xytuple = random_pos()
-        array.append(xytuple)
-
-def random_pos():
-    return (random.randint(1, 30), random.randint(1, 16))
-
 def game():
     global array
     global flag
@@ -272,37 +229,91 @@ def game():
             screen.blit(flag_img, (420, 10))
             screen.blit(font.render(str(flag_count), True, (0, 0, 0)), (455, 11))
 
-screen.fill((210, 210, 210))
-draw_grid()
-while True:
-    for event in pygame.event.get():
-        mouse_presses = pygame.mouse.get_pressed()
-        if event.type == pygame.QUIT:
-            raise Exception
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if (event.button == 1 and mouse_presses[2]) or (event.button == 3 and mouse_presses[0]):
-                mouse_pos = pygame.mouse.get_pos()
-                is_chord = True
-                if not is_gameover and not is_clock:
-                    game()
-            elif mouse_presses[0] and not is_chord:
-                mouse_pos = pygame.mouse.get_pos()
-                if mouse_pos[1] > 120:
-                    is_mouse += 1
-                if is_mouse == 1:
-                    start_time = time.time()
-                if not is_gameover and not is_clock:
-                    game()
-            elif mouse_presses[2] and not is_chord:
-                is_right_mouse = True
-                mouse_pos = pygame.mouse.get_pos()
-                if not is_gameover and not is_clock:
-                    game()
-    is_right_mouse = False
-    is_chord = False
-    if is_mouse >= 1:
-        clock()
-    if is_clock:
-        game_over()
-    board_update()
-    pygame.display.update()
+def game_over():
+    if is_gameover:
+        screen.blit(font.render('GAME OVER', True, (0, 0, 0)), (360, 85))
+    else:
+        screen.blit(font.render('YOU WIN', True, (0, 0, 0)), (390, 85))
+        if play_sound:
+            mixer.Sound('win.wav').play()
+
+def mine_check(a, b) -> None:
+    global flag
+    flag = 0
+    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
+              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
+    for tuple_ in tuples:
+        flag += 1 if tuple_ in array else 0
+
+def mine_render(x, y):
+    tuples = [(0, 0, 255), (0, 102, 51), (255, 0, 0), (0, 0, 102),
+              (102, 51, 0), (0, 153, 153), (0, 0, 0), (160, 160, 160)]
+    for i, tuple_ in enumerate(tuples, 1):
+        if flag == i:
+            pygame.draw.rect(screen, [180] * 3, [x, y, 28, 28])
+            screen.blit(font.render(str(flag), True, tuple_), (x + 7.5, y))
+
+def mine_shift(a, b) -> None:
+    global array
+    array.remove((a, b))
+    (mine_x, mine_y) = random_pos()
+    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
+        (mine_x, mine_y) = random_pos()
+    array.append((mine_x, mine_y))
+
+def place_mine() -> None:
+    global array
+    for i in range(total_mines):
+        xytuple = random_pos()
+        new_array = no_mine_array + array if i else no_mine_array
+        while xytuple in new_array:
+            xytuple = random_pos()
+        array.append(xytuple)
+
+def random_pos():
+    return (random.randint(1, 30), random.randint(1, 16))
+
+def main():
+    global is_chord
+    global is_gameover
+    global is_mouse
+    global is_right_mouse
+    global mouse_pos
+    global start_time
+    screen.fill((210, 210, 210))
+    draw_grid()
+    while True:
+        for event in pygame.event.get():
+            mouse_presses = pygame.mouse.get_pressed()
+            if event.type == pygame.QUIT:
+                raise Exception
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if (event.button == 1 and mouse_presses[2]) or (event.button == 3 and mouse_presses[0]):
+                    mouse_pos = pygame.mouse.get_pos()
+                    is_chord = True
+                    if not is_gameover and not is_clock:
+                        game()
+                elif mouse_presses[0] and not is_chord:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if mouse_pos[1] > 120:
+                        is_mouse += 1
+                    if is_mouse == 1:
+                        start_time = time.time()
+                    if not is_gameover and not is_clock:
+                        game()
+                elif mouse_presses[2] and not is_chord:
+                    is_right_mouse = True
+                    mouse_pos = pygame.mouse.get_pos()
+                    if not is_gameover and not is_clock:
+                        game()
+        is_right_mouse = False
+        is_chord = False
+        if is_mouse >= 1:
+            clock()
+        if is_clock:
+            game_over()
+        board_update()
+        pygame.display.update()
+
+if __name__ == '__main__':
+    main()
