@@ -99,120 +99,20 @@ def chording(a,b):
     if flag1 == flag:
         if a > 1 and b > 1:
             chord_action((a - 2, b - 2), (a - 1, b - 1))
-            # tuple0 = a - 2, b - 2
-            # tuple1 = a - 1, b - 1
-            # if not (flag_map[tuple0] or tuple1 in array):
-            #     mine_check(*tuple1)
-            #     if not flag:
-            #         draw_rect(*tuple0)
-            #         cell_status[tuple0] = 1
-            #         floodfill(*tuple1)
-            #     else:
-            #         mine_render(tuple0[0] * 30, 120 + tuple0[1]* 30)
-            #         cell_status[tuple0] = 1
-            # if not flag_map[tuple0] and tuple1 in array:
-            #     cell_status[tuple0] = 1
-            #     mine_shift(*tuple1)
-            #   blowup((a - 2) * 30, 120 + (b - 2) * 30)
         if a > 1:
             chord_action((a - 2, b - 1), (a - 1, b))
-            # if not (flag_map[a - 2, b - 1] or (a - 1, b) in array):
-            #     mine_check(a - 1, b)
-            #     if not flag:
-            #         draw_rect(a - 2, b - 1)
-            #         cell_status[a - 2, b - 1] = 1
-            #         floodfill(a - 1, b)
-            #     else:
-            #         mine_render((a - 2) * 30, 120 + (b - 1) * 30)
-            #         cell_status[a - 2, b - 1] = 1
-            # if not flag_map[a - 2, b - 1] and (a - 1, b) in array:
-            #     cell_status[a - 2, b - 1] = 1
-            #     mine_shift(a - 1, b)
-                #blowup((a-2)*30,120+(b-1)*30)
-        if b<16:
-            if flag_map[a-1,b]==0 and (a,b+1) not in array:
-                mine_check(a,b+1)
-                if not flag:
-                    draw_rect(a - 1, b)
-                    cell_status[a-1,b]=1
-                    floodfill(a,b+1)
-                else:
-                    mine_render((a-1)*30,120+(b)*30)
-                    cell_status[a-1,b]=1
-            if flag_map[a-1,b]==0 and (a,b+1) in array:
-                cell_status[a-1,b]=1
-                mine_shift(a,b+1)
-                #blowup((a-1)*30,120+(b)*30)
-        if a<30 and b<16:
-            if flag_map[a,b]==0 and (a+1,b+1) not in array:
-                mine_check(a+1,b+1)
-                if not flag:
-                    draw_rect(a, b)
-                    cell_status[a,b]=1
-                    floodfill(a+1,b+1) 
-                else:
-                    mine_render((a)*30,120+(b)*30)
-                    cell_status[a,b]=1
-            if flag_map[a,b]==0 and (a+1,b+1) in array:
-                cell_status[a,b]=1
-                mine_shift(a+1,b+1)
-                #blowup((a)*30,120+(b)*30)
-        if a<30:
-            if flag_map[a,b-1]==0 and (a+1,b) not in array:
-                mine_check(a+1,b)
-                if not flag:
-                    draw_rect(a, b - 1)
-                    cell_status[a,b-1]=1
-                    floodfill(a+1,b) 
-                else:
-                    mine_render((a)*30,120+(b-1)*30)
-                    cell_status[a,b-1]=1
-            if flag_map[a,b-1]==0 and (a+1,b) in array:
-                cell_status[a,b-1]=1
-                mine_shift(a+1,b)
-                #blowup((a)*30,120+(b-1)*30)
-        if b>1:
-            if flag_map[a-1,b-2]==0 and (a,b-1) not in array:
-                mine_check(a,b-1)
-                if not flag:
-                    draw_rect(a - 1, b - 2)
-                    cell_status[a-1,b-2]=1
-                    floodfill(a,b-1)
-                else:
-                    mine_render((a-1)*30,120+(b-2)*30)
-                    cell_status[a-1,b-2]=1
-            if flag_map[a-1,b-2]==0 and (a,b-1) in array:
-                cell_status[a-1,b-2]=1
-                mine_shift(a,b-1)
-                #blowup((a-1)*30,120+(b-2)*30)
-        if a>1 and b<16:
-            if flag_map[a-2,b]==0 and (a-1,b+1) not in array:
-                mine_check(a-1,b+1)
-                if not flag:
-                    draw_rect(a - 2, b)
-                    cell_status[a-2,b]=1
-                    floodfill(a-1,b+1)
-                else:
-                    mine_render((a-2)*30,120+(b)*30)
-                    cell_status[a-2,b]=1
-            if flag_map[a-2,b]==0 and (a-1,b+1) in array:
-                cell_status[a-2,b]=1
-                mine_shift(a-1,b+1)
-                #blowup((a-2)*30,120+(b)*30)
-        if a<30 and b>1:
-            if flag_map[a,b-2]==0 and (a+1,b-1) not in array:
-                mine_check(a+1,b-1)
-                if not flag:
-                    draw_rect(a, b - 2)
-                    cell_status[a,b-2]=1
-                    floodfill(a+1,b-1)
-                else:
-                    mine_render((a)*30,120+(b-2)*30)
-                    cell_status[a,b-2]=1
-            if flag_map[a,b-2]==0 and (a+1,b-1) in array:
-                cell_status[a,b-2]=1
-                mine_shift(a+1,b-1)
-                #blowup((a)*30,120+(b-2)*30)
+        if b < 16:
+            chord_action((a - 1, b), (a, b + 1))
+        if a < 30 and b < 16:
+            chord_action((a, b), (a + 1, b + 1))
+        if a < 30:
+            chord_action((a, b - 1), (a + 1, b))
+        if b > 1:
+            chord_action((a - 1, b - 2), (a, b - 1))
+        if a > 1 and b < 16:
+            chord_action((a - 2, b), (a - 1, b + 1))
+        if a < 30 and b > 1:
+            chord_action((a, b - 2), (a + 1, b - 1))
         if play_sound:
             mixer.Sound('chord.wav').play()
 
