@@ -58,6 +58,24 @@ def mine_shift(a, b) -> None:
     while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
         (mine_x, mine_y) = rand()
     array.append((mine_x, mine_y))
+    
+def chord_action(tuple0, tuple1):
+    global cell_status
+    global flag
+    global flag_map
+    if not (flag_map[tuple0] or tuple1 in array):
+        mine_check(*tuple1)
+        if not flag:
+            draw_rect(*tuple0)
+            cell_status[tuple0] = 1
+            floodfill(*tuple1)
+        else:
+            mine_render(tuple0[0] * 30, 120 + tuple0[1] * 30)
+            cell_status[tuple0] = 1
+    if not flag_map[tuple0] and tuple1 in array:
+        cell_status[tuple0] = 1
+        mine_shift(*tuple1)
+        # blowup(tuple0[0] * 30, 120 + tuple0[1] * 30)
 
 def chording(a,b):
     flag1 = 0
@@ -80,32 +98,36 @@ def chording(a,b):
     mine_check(a, b)
     if flag1 == flag:
         if a > 1 and b > 1:
-            if not (flag_map[a - 2, b - 2] or (a - 1, b - 1) in array):
-                mine_check(a - 1, b - 1)
-                if not flag:
-                    draw_rect(a - 2, b - 2)
-                    cell_status[a - 2, b - 2] = 1
-                    floodfill(a - 1, b - 1)
-                else:
-                    mine_render((a - 2) * 30, 120 + (b - 2) * 30)
-                    cell_status[a - 2, b - 2] = 1
-            if not flag_map[a - 2, b - 2] and (a - 1, b - 1) in array:
-                cell_status[a - 2, b - 2] = 1
-                mine_shift(a - 1, b - 1)
-                #blowup((a-2)*30,120+(b-2)*30)
+            chord_action((a - 2, b - 2), (a - 1, b - 1))
+            # tuple0 = a - 2, b - 2
+            # tuple1 = a - 1, b - 1
+            # if not (flag_map[tuple0] or tuple1 in array):
+            #     mine_check(*tuple1)
+            #     if not flag:
+            #         draw_rect(*tuple0)
+            #         cell_status[tuple0] = 1
+            #         floodfill(*tuple1)
+            #     else:
+            #         mine_render(tuple0[0] * 30, 120 + tuple0[1]* 30)
+            #         cell_status[tuple0] = 1
+            # if not flag_map[tuple0] and tuple1 in array:
+            #     cell_status[tuple0] = 1
+            #     mine_shift(*tuple1)
+            #   blowup((a - 2) * 30, 120 + (b - 2) * 30)
         if a > 1:
-            if not (flag_map[a - 2, b - 1] or (a - 1, b) in array):
-                mine_check(a - 1, b)
-                if not flag:
-                    draw_rect(a - 2, b - 1)
-                    cell_status[a - 2, b - 1] = 1
-                    floodfill(a - 1, b)
-                else:
-                    mine_render((a - 2) * 30, 120 + (b - 1) * 30)
-                    cell_status[a - 2, b - 1] = 1
-            if not flag_map[a - 2, b - 1] and (a - 1, b) in array:
-                cell_status[a - 2, b - 1] = 1
-                mine_shift(a - 1, b)
+            chord_action((a - 2, b - 1), (a - 1, b))
+            # if not (flag_map[a - 2, b - 1] or (a - 1, b) in array):
+            #     mine_check(a - 1, b)
+            #     if not flag:
+            #         draw_rect(a - 2, b - 1)
+            #         cell_status[a - 2, b - 1] = 1
+            #         floodfill(a - 1, b)
+            #     else:
+            #         mine_render((a - 2) * 30, 120 + (b - 1) * 30)
+            #         cell_status[a - 2, b - 1] = 1
+            # if not flag_map[a - 2, b - 1] and (a - 1, b) in array:
+            #     cell_status[a - 2, b - 1] = 1
+            #     mine_shift(a - 1, b)
                 #blowup((a-2)*30,120+(b-1)*30)
         if b<16:
             if flag_map[a-1,b]==0 and (a,b+1) not in array:
@@ -194,7 +216,7 @@ def chording(a,b):
         if play_sound:
             mixer.Sound('chord.wav').play()
 
-def mine_check(a,b):
+def mine_check(a, b):
     global flag
     flag = 0
     if (a - 1, b - 1) in array:
@@ -354,7 +376,7 @@ def main_game():
     global is_clock
     global is_gameover
     global is_chord
-    global flag_mouse
+    global is_mouse
     global no_mine_array
     global flag_count
     global array
@@ -367,26 +389,26 @@ def main_game():
             flag=0
             b+=1
             if mouse_pos[0]<=x+blockSize and mouse_pos[1]<=y+blockSize and mouse_pos[0]>=x and mouse_pos[1]>=y:
-                if flag_mouse == 1:
+                if is_mouse == 1:
                     no_mine_array = [(a, b), (a - 1, b), (a, b - 1), (a - 1, b - 1), (a + 1, b),
                                      (a, b + 1), (a + 1, b + 1), (a + 1, b - 1), (a - 1, b + 1)]
                     place_mine()
-                    flag_mouse += 1
+                    is_mouse += 1
                 two_right_click = 0
-                if right_mouse_flag and flag_map[a - 1, b - 1] == 1 and not is_chord:
+                if is_right_mouse and flag_map[a - 1, b - 1] == 1 and not is_chord:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
                     pygame.draw.rect(screen, [210] * 3, [x, y + 1, 28, 28])
                     flag_map[a-1,b-1]=0
                     two_right_click=1
                     flag_count += 1
-                if right_mouse_flag and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and not is_chord:
+                if is_right_mouse and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and not is_chord:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
                     screen.blit (flag_img,(x,y))
                     flag_map[a-1,b-1]=1
                     flag_count -= 1
-                if not right_mouse_flag and flag_map[a-1,b-1]==0 and not is_chord and cell_status[a-1,b-1]==0:
+                if not is_right_mouse and flag_map[a-1,b-1]==0 and not is_chord and cell_status[a-1,b-1]==0:
                     if (a,b) in array:
                         cell_status[a-1,b-1]=1
                         mine_shift(a,b)
@@ -434,7 +456,7 @@ def game_over():
         if play_sound:
             mixer.Sound('win.wav').play()
 
-flag_mouse=0
+is_mouse=0
 start_time=0
 screen.fill((210,210,210))
 draw_grid()
@@ -452,19 +474,19 @@ while True:
             elif mouse_presses[0] and not is_chord:
                 mouse_pos=pygame.mouse.get_pos()
                 if mouse_pos[1]>120:
-                    flag_mouse=flag_mouse+1
-                if flag_mouse==1:
+                    is_mouse=is_mouse+1
+                if is_mouse==1:
                     start_time=time.time()
                 if not is_gameover and not is_clock:
                     main_game()
             elif mouse_presses[2] and not is_chord:
-                right_mouse_flag = True
+                is_right_mouse = True
                 mouse_pos=pygame.mouse.get_pos()
                 if not is_gameover and not is_clock:
                     main_game()
-    right_mouse_flag = False
+    is_right_mouse = False
     is_chord = False
-    if flag_mouse>=1:
+    if is_mouse >= 1:
         clock()
     if is_clock:
         game_over()
