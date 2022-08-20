@@ -1,7 +1,7 @@
 '''
 Ezio416 fork of "Minesweeper but you can't lose" by Thebrowndot
 Forked:   2022-08-18
-Modified: 2022-08-18
+Modified: 2022-08-19
 '''
 import numpy as np
 import random
@@ -50,15 +50,6 @@ def draw_grid() -> None:
 def draw_rect(a, b) -> None:
     pygame.draw.rect(screen, [180] * 3, [(a) * 30, 120 + ((b) * 30), 28, 28])
 
-def mine_shift(a, b) -> None:
-    global array
-    array.remove((a, b))
-    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
-    (mine_x, mine_y) = rand()
-    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
-        (mine_x, mine_y) = rand()
-    array.append((mine_x, mine_y))
-    
 def chord_action(tuple0, tuple1):
     global cell_status
     global flag
@@ -116,25 +107,22 @@ def chording(a,b):
         if play_sound:
             mixer.Sound('chord.wav').play()
 
+def mine_shift(a, b) -> None:
+    global array
+    array.remove((a, b))
+    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
+    (mine_x, mine_y) = rand()
+    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
+        (mine_x, mine_y) = rand()
+    array.append((mine_x, mine_y))
+    
 def mine_check(a, b):
     global flag
     flag = 0
-    if (a - 1, b - 1) in array:
-        flag += 1
-    if (a - 1, b + 1) in array:
-        flag += 1
-    if (a + 1, b + 1) in array:
-        flag += 1
-    if (a + 1, b - 1) in array:
-        flag += 1
-    if (a, b - 1) in array:
-        flag += 1
-    if (a, b + 1) in array:
-        flag += 1
-    if (a + 1, b) in array:
-        flag += 1
-    if (a - 1, b) in array:
-        flag += 1
+    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
+              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
+    for tuple_ in tuples:
+        flag += 1 if tuple_ in array else 0
 
 cell_status = np.zeros([30, 16], dtype=int)
 flag_map = np.zeros([30, 16], dtype=int)
