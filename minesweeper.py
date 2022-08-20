@@ -21,6 +21,8 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 900, 600
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 array = []
+cell_status = np.zeros([30, 16], dtype=int)
+flag_map = np.zeros([30, 16], dtype=int)
 is_chord = False
 is_clock = False
 is_gameover = False
@@ -35,7 +37,7 @@ def place_mine() -> list:
     for i in range(total_mines):
         xytuple = rand()
         new_array = no_mine_array + array if i else no_mine_array
-        while xytuple in new_array: 
+        while xytuple in new_array:
             xytuple = rand()
         array.append(xytuple)
     return array
@@ -50,7 +52,7 @@ def draw_grid() -> None:
 def draw_rect(a, b) -> None:
     pygame.draw.rect(screen, [180] * 3, [(a) * 30, 120 + ((b) * 30), 28, 28])
 
-def chord_action(tuple0, tuple1):
+def chording_helper(tuple0, tuple1) -> None:
     global cell_status
     global flag
     global flag_map
@@ -68,7 +70,7 @@ def chord_action(tuple0, tuple1):
         mine_shift(*tuple1)
         # blowup(tuple0[0] * 30, 120 + tuple0[1] * 30)
 
-def chording(a,b):
+def chording(a, b) -> None:
     flag1 = 0
     if a > 1 and b > 1:
         flag1 += 1 if flag_map[a - 2, b - 2] else 0
@@ -89,21 +91,21 @@ def chording(a,b):
     mine_check(a, b)
     if flag1 == flag:
         if a > 1 and b > 1:
-            chord_action((a - 2, b - 2), (a - 1, b - 1))
+            chording_helper((a - 2, b - 2), (a - 1, b - 1))
         if a > 1:
-            chord_action((a - 2, b - 1), (a - 1, b))
+            chording_helper((a - 2, b - 1), (a - 1, b))
         if b < 16:
-            chord_action((a - 1, b), (a, b + 1))
+            chording_helper((a - 1, b), (a, b + 1))
         if a < 30 and b < 16:
-            chord_action((a, b), (a + 1, b + 1))
+            chording_helper((a, b), (a + 1, b + 1))
         if a < 30:
-            chord_action((a, b - 1), (a + 1, b))
+            chording_helper((a, b - 1), (a + 1, b))
         if b > 1:
-            chord_action((a - 1, b - 2), (a, b - 1))
+            chording_helper((a - 1, b - 2), (a, b - 1))
         if a > 1 and b < 16:
-            chord_action((a - 2, b), (a - 1, b + 1))
+            chording_helper((a - 2, b), (a - 1, b + 1))
         if a < 30 and b > 1:
-            chord_action((a, b - 2), (a + 1, b - 1))
+            chording_helper((a, b - 2), (a + 1, b - 1))
         if play_sound:
             mixer.Sound('chord.wav').play()
 
@@ -115,8 +117,8 @@ def mine_shift(a, b) -> None:
     while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
         (mine_x, mine_y) = rand()
     array.append((mine_x, mine_y))
-    
-def mine_check(a, b):
+
+def mine_check(a, b) -> None:
     global flag
     flag = 0
     tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
@@ -124,81 +126,34 @@ def mine_check(a, b):
     for tuple_ in tuples:
         flag += 1 if tuple_ in array else 0
 
-cell_status = np.zeros([30, 16], dtype=int)
-flag_map = np.zeros([30, 16], dtype=int)
-def floodfill(k, l):
-    if k + 1 <= 30 and l >= 1 and k + 1 >= 1 and l <= 16:
-        mine_check(k + 1 , l)
-        if not flag and not cell_status[k, l - 1] and not flag_map[k, l - 1]:
-            draw_rect(k, l - 1)
-            cell_status[k,l-1]=1
-            floodfill(k+1,l)
-        if flag and cell_status[k,l-1]==0 and flag_map[k,l-1]==0:
-            mine_render((k)*30,120+((l-1)*30))
-            cell_status[k,l-1]=1
-    if k>=1 and k<=30 and l+1>=1 and l+1<=16:
-        mine_check(k,l+1)
-        if not flag and cell_status[k-1,l]==0 and flag_map[k-1,l]==0:
-            draw_rect(k - 1, l)
-            cell_status[k-1,l]=1
-            floodfill(k,l+1)
-        if flag and cell_status[k-1,l]==0 and flag_map[k-1,l]==0:
-            mine_render((k-1)*30,120+((l)*30))
-            cell_status[k-1,l]=1
-    if k+1>=1 and k+1<=30 and l+1>=1 and l+1<=16:
-        mine_check(k+1,l+1)
-        if not flag and cell_status[k,l]==0 and flag_map[k,l]==0:
-            draw_rect(k, l)
-            cell_status[k,l]=1
-            floodfill(k+1,l+1)
-        if flag and cell_status[k,l]==0 and flag_map[k,l]==0:
-            mine_render((k)*30,120+((l)*30))
-            cell_status[k,l]=1
-    if k+1>=1 and k+1<=30 and l-1>=1 and l-1<=16:
-        mine_check(k+1,l-1)
-        if not flag and cell_status[k,l-2]==0 and flag_map[k,l-2]==0:
-            draw_rect(k, l - 2)
-            cell_status[k,l-2]=1
-            floodfill(k+1,l-1) 
-        if flag and cell_status[k,l-2]==0 and flag_map[k,l-2]==0:
-           mine_render((k)*30,120+((l-2)*30))
-           cell_status[k,l-2]=1
-    if k-1>=1 and k-1<=30 and l>=1 and l<=16:
-        mine_check(k-1,l)
-        if not flag and cell_status[k-2,l-1]==0 and flag_map[k-2,l-1]==0:
-            draw_rect(k - 2, l - 1)
-            cell_status[k-2,l-1]=1
-            floodfill(k-1,l) 
-        if flag and cell_status[k-2,l-1]==0 and flag_map[k-2,l-1]==0:
-            mine_render((k-2)*30,120+((l-1)*30))
-            cell_status[k-2,l-1]=1  
-    if k>=1 and k<=30 and l-1>=1 and l-1<=16:
-        mine_check(k,l-1)
-        if not flag and cell_status[k-1,l-2]==0 and flag_map[k-1,l-2]==0:
-            draw_rect(k - 1, l - 2)
-            cell_status[k-1,l-2]=1
-            floodfill(k,l-1)
-        if flag and cell_status[k-1,l-2]==0 and flag_map[k-1,l-2]==0:
-            mine_render((k-1)*30,120+((l-2)*30))
-            cell_status[k-1,l-2]=1
-    if k-1>=1 and k-1<=30 and l-1>=1 and l-1<=16:
-        mine_check(k-1,l-1)
-        if not flag and cell_status[k-2,l-2]==0 and flag_map[k-2,l-2]==0:
-            draw_rect(k - 2, l - 2)
-            cell_status[k-2,l-2]=1
-            floodfill(k-1,l-1)
-        if flag and cell_status[k-2,l-2]==0 and flag_map[k-2,l-2]==0:
-            mine_render((k-2)*30,120+((l-2)*30))
-            cell_status[k-2,l-2]=1
-    if k-1>=1 and k-1<=30 and l+1>=1 and l+1<=16:
-        mine_check(k-1,l+1)
-        if not flag and cell_status[k-2,l]==0 and flag_map[k-2,l]==0:
-            draw_rect(k - 2, l)
-            cell_status[k-2,l]=1
-            floodfill(k-1,l+1)
-        if flag and cell_status[k-2,l]==0 and flag_map[k-2,l]==0:
-            mine_render((k-2)*30,120+((l)*30))
-            cell_status[k-2,l]=1
+def floodfill_helper(tuple0, tuple1) -> None:
+    mine_check(*tuple0)
+    if not flag and not cell_status[tuple1] and not flag_map[tuple1]:
+        draw_rect(*tuple1)
+        cell_status[tuple1] = 1
+        floodfill(*tuple0)
+    if flag and not cell_status[tuple1] and not flag_map[tuple1]:
+        mine_render(tuple1[0] * 30, 120 + tuple1[1] * 30)
+        cell_status[tuple1] = 1
+
+def floodfill(a, b) -> None:
+    if a + 1 <= 30 and b >= 1 and a + 1 >= 1 and b <= 16:
+        floodfill_helper((a + 1, b), (a, b - 1))
+    if a >= 1 and a <= 30 and b + 1 >= 1 and b + 1 <= 16:
+        floodfill_helper((a, b + 1), (a - 1, b))
+    if a + 1 >= 1 and a + 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
+        floodfill_helper((a + 1, b + 1), (a, b))
+    if a + 1 >= 1 and a + 1 <= 30 and b - 1 >= 1 and b - 1 <= 16:
+        floodfill_helper((a + 1, b - 1), (a, b - 2))
+    if a - 1 >= 1 and a - 1 <= 30 and b >= 1 and b <= 16:
+        floodfill_helper((a - 1, b), (a - 2, b - 1))
+    if a >= 1 and a <= 30 and b - 1 >= 1 and b - 1 <= 16:
+        floodfill_helper((a, b - 1), (a - 1, b - 2))
+    if a - 1 >= 1 and a - 1 <= 30 and b - 1 >= 1 and b - 1 <= 16:
+        floodfill_helper((a - 1, b - 1), (a - 2, b - 2))
+    if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
+        floodfill_helper((a - 1, b + 1), (a - 2, b))
+
 def mine_render(x,y):
     if flag==1:
         pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
@@ -301,7 +256,7 @@ def main_game():
                         cell_status[a-1,b-1]=1
                         mine_shift(a,b)
                         #blowup(x,y)
-                    else: 
+                    else:
                         mine_check(a,b)
                         if flag and flag!=10:
                             if not cell_status[a - 1, b - 1] and play_sound:
@@ -338,7 +293,7 @@ def game_over():
     if is_gameover:
         font_ = font.render("GAME OVER", True, (0, 0, 0))
         screen.blit(font_, (360, 85))
-    else:  
+    else:
         font_ = font.render("YOU WIN", True, (0, 0, 0))
         screen.blit(font_, (390, 85))
         if play_sound:
