@@ -125,6 +125,23 @@ def floodfill(a, b) -> None:
     if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
         floodfill_helper((a - 1, b + 1), (a - 2, b))
 
+def mine_check(a, b) -> None:
+    global flag
+    flag = 0
+    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
+              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
+    for tuple_ in tuples:
+        flag += 1 if tuple_ in array else 0
+
+def mine_render(x, y):
+    tuples = [(0, 0, 255), (0,102,51), (255,0,0), (0,0,102),
+              (102,51,0), (0,153,153), (0,0,0), (160,160,160)]
+    for i, tuple_ in enumerate(tuples, 1):
+        if flag == i:
+            pygame.draw.rect(screen, [180] * 3, [x, y, 28, 28])
+            mine_count = font.render(str(flag), True, tuple_)
+            screen.blit(mine_count, (x + 7.5, y))
+
 def mine_shift(a, b) -> None:
     global array
     array.remove((a, b))
@@ -133,14 +150,6 @@ def mine_shift(a, b) -> None:
     while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
         (mine_x, mine_y) = rand()
     array.append((mine_x, mine_y))
-
-def mine_check(a, b) -> None:
-    global flag
-    flag = 0
-    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
-              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
-    for tuple_ in tuples:
-        flag += 1 if tuple_ in array else 0
 
 def place_mine() -> list:
     global array
@@ -152,40 +161,6 @@ def place_mine() -> list:
             xytuple = rand()
         array.append(xytuple)
     return array
-
-def mine_render(x,y):
-    if flag==1:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(0,0,255))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==2:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(0,102,51))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==3:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(255,0,0))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==4:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(0,0,102))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==5:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(102,51,0))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==6:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(0,153,153))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==7:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(0,0,0))
-        screen.blit(no_of_mines,(x+7.5,y))
-    if flag==8:
-        pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
-        no_of_mines=font.render(str(flag),True,(160,160,160))
-        screen.blit(no_of_mines,(x+7.5,y))
 
 def blowup(x,y):
     global is_clock
