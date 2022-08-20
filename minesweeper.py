@@ -70,12 +70,12 @@ def chording_helper(tuple0, tuple1) -> None:
             cell_status[tuple0] = 1
             floodfill(*tuple1)
         else:
-            mine_render(tuple0[0] * 30, 120 + tuple0[1] * 30)
+            mine_render(tuple0[0] * 30, tuple0[1] * 30 + 120)
             cell_status[tuple0] = 1
     if not flag_map[tuple0] and tuple1 in array:
         cell_status[tuple0] = 1
         mine_shift(*tuple1)
-        #blowup(tuple0[0] * 30, 120 + tuple0[1] * 30)
+        #blowup(tuple0[0] * 30, tuple0[1] * 30 + 120)
 
 def chording(a, b) -> None:
     flag1 = 0
