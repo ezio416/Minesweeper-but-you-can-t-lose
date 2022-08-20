@@ -37,7 +37,7 @@ start_time = 0
 total_mines = 99
 flag_count = total_mines
 
-def blowup(x, y):
+def blowup(x, y) -> None:
     global flag
     global is_clock
     global is_gameover
@@ -49,7 +49,7 @@ def blowup(x, y):
     if play_sound:
         mixer.Sound('blast.wav').play()
 
-def board_update():
+def board_update() -> None:
     global board_config
     for a in range(1, 31):
         for b in range(1, 17):
@@ -116,7 +116,7 @@ def chording(a, b) -> None:
         if play_sound:
             mixer.Sound('chord.wav').play()
 
-def clock():
+def clock() -> None:
     global is_clock
     if np.sum(cell_status) >= 381:
         is_clock = True
@@ -164,7 +164,7 @@ def floodfill(a, b) -> None:
     if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
         floodfill_helper((a - 1, b + 1), (a - 2, b))
 
-def game():
+def game() -> None:
     global array, flag, flag_count, is_chord, is_gameover, is_clock, is_mouse, mouse_pos, no_mine_array
     a = 0
     blockSize = 30
@@ -221,7 +221,7 @@ def game():
             screen.blit(flag_img, (420, 10))
             screen.blit(font.render(str(flag_count), True, (0, 0, 0)), (455, 11))
 
-def game_over():
+def game_over() -> None:
     if is_gameover:
         screen.blit(font.render('GAME OVER', True, (0, 0, 0)), (360, 85))
     else:
@@ -237,7 +237,7 @@ def mine_check(a, b) -> None:
     for tuple_ in tuples:
         flag += 1 if tuple_ in array else 0
 
-def mine_render(x, y):
+def mine_render(x, y) -> None:
     tuples = [(0, 0, 255), (0, 102, 51), (255, 0, 0), (0, 0, 102),
               (102, 51, 0), (0, 153, 153), (0, 0, 0), (160, 160, 160)]
     for i, tuple_ in enumerate(tuples, 1):
@@ -262,10 +262,10 @@ def place_mine() -> None:
             xytuple = random_pos()
         array.append(xytuple)
 
-def random_pos():
+def random_pos() -> tuple:
     return (random.randint(1, 30), random.randint(1, 16))
 
-def main():
+def main() -> None:
     global is_chord, is_gameover, is_mouse, is_right_mouse, mouse_pos, start_time
     screen.fill((210, 210, 210))
     draw_grid()
