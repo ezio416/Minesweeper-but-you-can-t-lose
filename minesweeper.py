@@ -31,17 +31,6 @@ play_sound = False
 total_mines = 99
 flag_count = total_mines
 
-def place_mine() -> list:
-    global array
-    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
-    for i in range(total_mines):
-        xytuple = rand()
-        new_array = no_mine_array + array if i else no_mine_array
-        while xytuple in new_array:
-            xytuple = rand()
-        array.append(xytuple)
-    return array
-
 def draw_grid() -> None:
     blockSize = 30
     for x in range(0, WINDOW_WIDTH, blockSize):
@@ -54,8 +43,6 @@ def draw_rect(a, b) -> None:
 
 def chording_helper(tuple0, tuple1) -> None:
     global cell_status
-    global flag
-    global flag_map
     if not (flag_map[tuple0] or tuple1 in array):
         mine_check(*tuple1)
         if not flag:
@@ -109,24 +96,8 @@ def chording(a, b) -> None:
         if play_sound:
             mixer.Sound('chord.wav').play()
 
-def mine_shift(a, b) -> None:
-    global array
-    array.remove((a, b))
-    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
-    (mine_x, mine_y) = rand()
-    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
-        (mine_x, mine_y) = rand()
-    array.append((mine_x, mine_y))
-
-def mine_check(a, b) -> None:
-    global flag
-    flag = 0
-    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
-              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
-    for tuple_ in tuples:
-        flag += 1 if tuple_ in array else 0
-
 def floodfill_helper(tuple0, tuple1) -> None:
+    global cell_status
     mine_check(*tuple0)
     if not flag and not cell_status[tuple1] and not flag_map[tuple1]:
         draw_rect(*tuple1)
@@ -153,6 +124,34 @@ def floodfill(a, b) -> None:
         floodfill_helper((a - 1, b - 1), (a - 2, b - 2))
     if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
         floodfill_helper((a - 1, b + 1), (a - 2, b))
+
+def mine_shift(a, b) -> None:
+    global array
+    array.remove((a, b))
+    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
+    (mine_x, mine_y) = rand()
+    while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
+        (mine_x, mine_y) = rand()
+    array.append((mine_x, mine_y))
+
+def mine_check(a, b) -> None:
+    global flag
+    flag = 0
+    tuples = [(a - 1, b - 1), (a - 1, b + 1), (a + 1, b + 1), (a + 1, b - 1),
+              (a, b - 1), (a, b + 1), (a + 1, b), (a - 1, b)]
+    for tuple_ in tuples:
+        flag += 1 if tuple_ in array else 0
+
+def place_mine() -> list:
+    global array
+    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
+    for i in range(total_mines):
+        xytuple = rand()
+        new_array = no_mine_array + array if i else no_mine_array
+        while xytuple in new_array:
+            xytuple = rand()
+        array.append(xytuple)
+    return array
 
 def mine_render(x,y):
     if flag==1:
