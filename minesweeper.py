@@ -145,22 +145,14 @@ def floodfill_helper(tuple0, tuple1) -> None:
         cell_status[tuple1] = 1
 
 def floodfill(a, b) -> None:
-    if a + 1 <= 30 and b >= 1 and a + 1 >= 1 and b <= 16:
-        floodfill_helper((a + 1, b), (a, b - 1))
-    if a >= 1 and a <= 30 and b + 1 >= 1 and b + 1 <= 16:
-        floodfill_helper((a, b + 1), (a - 1, b))
-    if a + 1 >= 1 and a + 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
-        floodfill_helper((a + 1, b + 1), (a, b))
-    if a + 1 >= 1 and a + 1 <= 30 and b - 1 >= 1 and b - 1 <= 16:
-        floodfill_helper((a + 1, b - 1), (a, b - 2))
-    if a - 1 >= 1 and a - 1 <= 30 and b >= 1 and b <= 16:
-        floodfill_helper((a - 1, b), (a - 2, b - 1))
-    if a >= 1 and a <= 30 and b - 1 >= 1 and b - 1 <= 16:
-        floodfill_helper((a, b - 1), (a - 1, b - 2))
-    if a - 1 >= 1 and a - 1 <= 30 and b - 1 >= 1 and b - 1 <= 16:
-        floodfill_helper((a - 1, b - 1), (a - 2, b - 2))
-    if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16:
-        floodfill_helper((a - 1, b + 1), (a - 2, b))
+    if 0 <= a <= 29 and 1 <= b <= 16: floodfill_helper((a + 1, b    ), (a    , b - 1))
+    if 1 <= a <= 30 and 0 <= b <= 15: floodfill_helper((a    , b + 1), (a - 1, b    ))
+    if 0 <= a <= 29 and 0 <= b <= 15: floodfill_helper((a + 1, b + 1), (a    , b    ))
+    if 0 <= a <= 29 and 2 <= b <= 17: floodfill_helper((a + 1, b - 1), (a    , b - 2))
+    if 2 <= a <= 31 and 1 <= b <= 16: floodfill_helper((a - 1, b    ), (a - 2, b - 1))
+    if 1 <= a <= 30 and 2 <= b <= 17: floodfill_helper((a    , b - 1), (a - 1, b - 2))
+    if 2 <= a <= 31 and 2 <= b <= 17: floodfill_helper((a - 1, b - 1), (a - 2, b - 2))
+    if 2 <= a <= 31 and 0 <= b <= 15: floodfill_helper((a - 1, b + 1), (a - 2, b    ))
 
 def game() -> None:
     global array, flag, flag_count, is_chord, is_gameover, is_clock, is_mouse, mouse_pos, no_mine_array
