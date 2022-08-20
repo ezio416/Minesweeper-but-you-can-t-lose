@@ -197,7 +197,7 @@ def mine_shift(a, b) -> None:
         (mine_x, mine_y) = rand()
     array.append((mine_x, mine_y))
 
-def place_mine() -> list:
+def place_mine() -> None:
     global array
     rand = lambda: (random.randint(1, 30), random.randint(1, 16))
     for i in range(total_mines):
@@ -206,27 +206,26 @@ def place_mine() -> list:
         while xytuple in new_array:
             xytuple = rand()
         array.append(xytuple)
-    return array
 
 def main_game():
-    global flag
-    global mouse_pos
-    global is_clock
-    global is_gameover
-    global is_chord
-    global is_mouse
-    global no_mine_array
-    global flag_count
     global array
+    global flag
+    global flag_count
+    global is_chord
+    global is_gameover
+    global is_clock
+    global is_mouse
+    global mouse_pos
+    global no_mine_array
+    a = 0
     blockSize = 30
-    a=0
     for x in range(0, WINDOW_WIDTH, blockSize):
-        a+=1
-        b=0
+        a += 1
+        b = 0
         for y in range(120, WINDOW_HEIGHT, blockSize):
-            flag=0
-            b+=1
-            if mouse_pos[0]<=x+blockSize and mouse_pos[1]<=y+blockSize and mouse_pos[0]>=x and mouse_pos[1]>=y:
+            flag = 0
+            b += 1
+            if mouse_pos[0] <= x + blockSize and mouse_pos[1] <= y + blockSize and mouse_pos[0] >= x and mouse_pos[1] >= y:
                 if is_mouse == 1:
                     no_mine_array = [(a, b), (a - 1, b), (a, b - 1), (a - 1, b - 1), (a + 1, b),
                                      (a, b + 1), (a + 1, b + 1), (a + 1, b - 1), (a - 1, b + 1)]
@@ -250,7 +249,7 @@ def main_game():
                     if (a,b) in array:
                         cell_status[a-1,b-1]=1
                         mine_shift(a,b)
-                        #blowup(x,y)
+                        #blowup(x, y)
                     else:
                         mine_check(a,b)
                         if flag and flag!=10:
