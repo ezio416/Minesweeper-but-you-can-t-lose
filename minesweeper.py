@@ -1,7 +1,7 @@
 '''
 Ezio416 fork of "Minesweeper but you can't lose" by Thebrowndot
 Forked:   2022-08-18
-Modified: 2022-08-19
+Modified: 2022-08-20
 '''
 import numpy as np
 import random
@@ -28,6 +28,7 @@ flag_map = np.zeros([30, 16], dtype=int)
 is_chord = False
 is_clock = False
 is_gameover = False
+is_mouse = 0
 no_mine_array = []
 play_sound = False
 total_mines = 99
@@ -130,7 +131,7 @@ def draw_grid() -> None:
             pygame.draw.rect(screen, (255, 255, 255), rect, 1)
 
 def draw_rect(a, b) -> None:
-    pygame.draw.rect(screen, [180] * 3, [(a) * 30, 120 + ((b) * 30), 28, 28])
+    pygame.draw.rect(screen, [180] * 3, [a * 30, b * 30 + 120, 28, 28])
 
 def floodfill_helper(tuple0, tuple1) -> None:
     global cell_status
@@ -140,7 +141,7 @@ def floodfill_helper(tuple0, tuple1) -> None:
         cell_status[tuple1] = 1
         floodfill(*tuple0)
     if flag and not cell_status[tuple1] and not flag_map[tuple1]:
-        mine_render(tuple1[0] * 30, 120 + tuple1[1] * 30)
+        mine_render(tuple1[0] * 30, tuple1[1] * 30 + 120)
         cell_status[tuple1] = 1
 
 def floodfill(a, b) -> None:
@@ -180,8 +181,8 @@ def mine_check(a, b) -> None:
         flag += 1 if tuple_ in array else 0
 
 def mine_render(x, y):
-    tuples = [(0, 0, 255), (0,102,51), (255,0,0), (0,0,102),
-              (102,51,0), (0,153,153), (0,0,0), (160,160,160)]
+    tuples = [(0, 0, 255), (0, 102, 51), (255, 0, 0), (0, 0, 102),
+              (102, 51, 0), (0, 153, 153), (0, 0, 0), (160, 160, 160)]
     for i, tuple_ in enumerate(tuples, 1):
         if flag == i:
             pygame.draw.rect(screen, [180] * 3, [x, y, 28, 28])
@@ -191,23 +192,24 @@ def mine_render(x, y):
 def mine_shift(a, b) -> None:
     global array
     array.remove((a, b))
-    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
-    (mine_x, mine_y) = rand()
+    (mine_x, mine_y) = random_pos()
     while cell_status[mine_x - 1, mine_y - 1] or (mine_x, mine_y) in array:
-        (mine_x, mine_y) = rand()
+        (mine_x, mine_y) = random_pos()
     array.append((mine_x, mine_y))
 
 def place_mine() -> None:
     global array
-    rand = lambda: (random.randint(1, 30), random.randint(1, 16))
     for i in range(total_mines):
-        xytuple = rand()
+        xytuple = random_pos()
         new_array = no_mine_array + array if i else no_mine_array
         while xytuple in new_array:
-            xytuple = rand()
+            xytuple = random_pos()
         array.append(xytuple)
 
-def main_game():
+def random_pos():
+    return (random.randint(1, 30), random.randint(1, 16))
+
+def game():
     global array
     global flag
     global flag_count
@@ -225,55 +227,54 @@ def main_game():
         for y in range(120, WINDOW_HEIGHT, blockSize):
             flag = 0
             b += 1
-            if mouse_pos[0] <= x + blockSize and mouse_pos[1] <= y + blockSize and mouse_pos[0] >= x and mouse_pos[1] >= y:
+            if x <= mouse_pos[0] <= x + blockSize and y <= mouse_pos[1] <= y + blockSize:
                 if is_mouse == 1:
-                    no_mine_array = [(a, b), (a - 1, b), (a, b - 1), (a - 1, b - 1), (a + 1, b),
-                                     (a, b + 1), (a + 1, b + 1), (a + 1, b - 1), (a - 1, b + 1)]
-                    place_mine()
                     is_mouse += 1
-                two_right_click = 0
-                if is_right_mouse and flag_map[a - 1, b - 1] == 1 and not is_chord:
+                    place_mine()
+                    no_mine_array = [(a - 1, b + 1), (a, b + 1), (a + 1, b + 1), (a - 1, b),
+                                     (a, b), (a + 1, b), (a - 1, b - 1), (a, b - 1), (a + 1, b - 1)]
+                two_right_click = False
+                if is_right_mouse and flag_map[a - 1, b - 1] and not is_chord:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
                     pygame.draw.rect(screen, [210] * 3, [x, y + 1, 28, 28])
-                    flag_map[a-1,b-1]=0
-                    two_right_click=1
                     flag_count += 1
-                if is_right_mouse and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and not is_chord:
+                    flag_map[a - 1, b - 1] = 0
+                    two_right_click = True
+                if is_right_mouse and not any([cell_status[a - 1, b - 1], flag_map[a - 1, b - 1], is_chord, two_right_click]):
                     if play_sound:
                         mixer.Sound('flag.wav').play()
-                    screen.blit (flag_img,(x,y))
-                    flag_map[a-1,b-1]=1
+                    screen.blit(flag_img, (x, y))
+                    flag_map[a - 1, b - 1] = 1
                     flag_count -= 1
-                if not is_right_mouse and flag_map[a-1,b-1]==0 and not is_chord and cell_status[a-1,b-1]==0:
-                    if (a,b) in array:
-                        cell_status[a-1,b-1]=1
-                        mine_shift(a,b)
+                if not any([cell_status[a - 1, b - 1], flag_map[a - 1, b - 1], is_chord, is_right_mouse]):
+                    if (a, b) in array:
+                        cell_status[a - 1, b - 1] = 1
+                        mine_shift(a, b)
                         #blowup(x, y)
                     else:
-                        mine_check(a,b)
-                        if flag and flag!=10:
+                        mine_check(a, b)
+                        if flag and flag != 10:
                             if not cell_status[a - 1, b - 1] and play_sound:
                                 mixer.Sound('click.wav').play()
                             mine_render(x, y)
-                            cell_status[a-1,b-1]=1
+                            cell_status[a - 1, b - 1] = 1
                         if not flag:
                             if not cell_status[a - 1, b - 1] and play_sound:
                                 mixer.Sound('empty_cell.wav').play()
-                            pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-1)*30),28,28])
-                            cell_status[a-1,b-1]=1
-                            floodfill(a,b)
-                if is_chord and flag_map[a-1,b-1]==0:
-                    chording(a,b)
+                            pygame.draw.rect(screen, [180] * 3, [(a - 1) * 30, (b - 1) * 30 + 120, 28, 28])
+                            cell_status[a - 1, b - 1] = 1
+                            floodfill(a, b)
+                if is_chord and not flag_map[a - 1, b - 1]:
+                    chording(a, b)
                     is_chord = False
-                mouse_pos=(0,0)
-            pygame.draw.rect(screen,[210,210,210],[420,10,73,30])
-            pygame.draw.rect(screen,[0,0,0],[420,10,73,30],2)
-            screen.blit (flag_img,(420,10))
-            flag_font=font.render(str(flag_count),True,(0,0,0))
-            screen.blit(flag_font,(455,11))
+                mouse_pos = (0, 0)
+            pygame.draw.rect(screen, [210] * 3,[420, 10, 73, 30])
+            pygame.draw.rect(screen, [0] * 3, [420, 10, 73, 30] ,2)
+            screen.blit (flag_img, (420, 10))
+            flag_font=font.render(str(flag_count), True, (0) * 3)
+            screen.blit(flag_font, (455, 11))
 
-is_mouse=0
 start_time=0
 screen.fill((210,210,210))
 draw_grid()
@@ -287,7 +288,7 @@ while True:
                 mouse_pos=pygame.mouse.get_pos()
                 is_chord = True
                 if not is_gameover and not is_clock:
-                    main_game()
+                    game()
             elif mouse_presses[0] and not is_chord:
                 mouse_pos=pygame.mouse.get_pos()
                 if mouse_pos[1]>120:
@@ -295,12 +296,12 @@ while True:
                 if is_mouse==1:
                     start_time=time.time()
                 if not is_gameover and not is_clock:
-                    main_game()
+                    game()
             elif mouse_presses[2] and not is_chord:
                 is_right_mouse = True
                 mouse_pos=pygame.mouse.get_pos()
                 if not is_gameover and not is_clock:
-                    main_game()
+                    game()
     is_right_mouse = False
     is_chord = False
     if is_mouse >= 1:
