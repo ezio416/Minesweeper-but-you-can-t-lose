@@ -21,13 +21,13 @@ WINDOW_WIDTH, WINDOW_HEIGHT = 900, 600
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 array = []
-chord_flag = False
-clock_flag = False
-game_over_flag = False
+is_chord = False
+is_clock = False
+is_gameover = False
 no_mine_array = []
 play_sound = False
 total_mines = 99
-flag_number = total_mines
+flag_count = total_mines
 
 def place_mine() -> list:
     global array
@@ -322,15 +322,16 @@ def mine_render(x,y):
         pygame.draw.rect(screen,[180] * 3,[x,y,28,28])
         no_of_mines=font.render(str(flag),True,(160,160,160))
         screen.blit(no_of_mines,(x+7.5,y))
+
 def blowup(x,y):
-    global clock_flag
+    global is_clock
     global flag
-    global game_over_flag
+    global is_gameover
     place_mine()
     screen.blit(mine_img,(x,y))
-    clock_flag = True
+    is_clock = True
     flag=10
-    game_over_flag = True
+    is_gameover = True
     if play_sound:
         mixer.Sound('blast.wav').play()
 
@@ -350,12 +351,12 @@ def board_update():
 def main_game():
     global flag
     global mouse_pos
-    global clock_flag
-    global game_over_flag
-    global chord_flag
-    global mouse_flag
+    global is_clock
+    global is_gameover
+    global is_chord
+    global flag_mouse
     global no_mine_array
-    global flag_number
+    global flag_count
     global array
     blockSize = 30
     a=0
@@ -366,34 +367,32 @@ def main_game():
             flag=0
             b+=1
             if mouse_pos[0]<=x+blockSize and mouse_pos[1]<=y+blockSize and mouse_pos[0]>=x and mouse_pos[1]>=y:
-                if mouse_flag==1:
-                    no_mine_array=[(a,b),(a-1,b),(a,b-1),(a-1,b-1),(a+1,b),(a,b+1),(a+1,b+1),(a+1,b-1),(a-1,b+1)]
+                if flag_mouse == 1:
+                    no_mine_array = [(a, b), (a - 1, b), (a, b - 1), (a - 1, b - 1), (a + 1, b),
+                                     (a, b + 1), (a + 1, b + 1), (a + 1, b - 1), (a - 1, b + 1)]
                     place_mine()
-                    mouse_flag=mouse_flag+1
-                two_right_click=0
-                if right_mouse_flag and flag_map[a-1,b-1]==1 and not chord_flag:
+                    flag_mouse += 1
+                two_right_click = 0
+                if right_mouse_flag and flag_map[a - 1, b - 1] == 1 and not is_chord:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
-                    pygame.draw.rect(screen,[210,210,210],[x,y+1,28,28])
+                    pygame.draw.rect(screen, [210] * 3, [x, y + 1, 28, 28])
                     flag_map[a-1,b-1]=0
                     two_right_click=1
-                    flag_number += 1
-
-                if right_mouse_flag and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and not chord_flag:
+                    flag_count += 1
+                if right_mouse_flag and cell_status[a-1,b-1]==0 and flag_map[a-1,b-1]==0 and two_right_click==0 and not is_chord:
                     if play_sound:
                         mixer.Sound('flag.wav').play()
                     screen.blit (flag_img,(x,y))
                     flag_map[a-1,b-1]=1
-                    flag_number -= 1
-            
-                if not right_mouse_flag and flag_map[a-1,b-1]==0 and not chord_flag and cell_status[a-1,b-1]==0:
+                    flag_count -= 1
+                if not right_mouse_flag and flag_map[a-1,b-1]==0 and not is_chord and cell_status[a-1,b-1]==0:
                     if (a,b) in array:
                         cell_status[a-1,b-1]=1
                         mine_shift(a,b)
                         #blowup(x,y)
                     else: 
                         mine_check(a,b)
-                        
                         if flag and flag!=10:
                             if not cell_status[a - 1, b - 1] and play_sound:
                                 mixer.Sound('click.wav').play()
@@ -405,37 +404,37 @@ def main_game():
                             pygame.draw.rect(screen,[180] * 3,[(a-1)*30,120+((b-1)*30),28,28])
                             cell_status[a-1,b-1]=1
                             floodfill(a,b)
-                
-                if chord_flag and flag_map[a-1,b-1]==0:
+                if is_chord and flag_map[a-1,b-1]==0:
                     chording(a,b)
-                    chord_flag = False
+                    is_chord = False
                 mouse_pos=(0,0)
             pygame.draw.rect(screen,[210,210,210],[420,10,73,30])
             pygame.draw.rect(screen,[0,0,0],[420,10,73,30],2)
             screen.blit (flag_img,(420,10))
-            flag_font=font.render(str(flag_number),True,(0,0,0))
+            flag_font=font.render(str(flag_count),True,(0,0,0))
             screen.blit(flag_font,(455,11))
+
 def clock():
-    global clock_flag
+    global is_clock
     if np.sum(cell_status)>=381:
-        clock_flag=1
-    if not clock_flag:
+        is_clock=1
+    if not is_clock:
         pygame.draw.rect(screen,[210,210,210],[428,50,57,28])
         pygame.draw.rect(screen,[0,0,0],[428,50,57,28],2)
         time_font=font.render(str("%03d"%(time.time()-start_time)),True,(255,0,0))
         screen.blit(time_font,(430,50))
 
 def game_over():
-    if game_over_flag:
-        game_over_font = font.render("GAME OVER", True, (0, 0, 0))
-        screen.blit(game_over_font, (360, 85))
+    if is_gameover:
+        font_ = font.render("GAME OVER", True, (0, 0, 0))
+        screen.blit(font_, (360, 85))
     else:  
-        you_win_font = font.render("YOU WIN", True, (0, 0, 0))
-        screen.blit(you_win_font, (390, 85))
+        font_ = font.render("YOU WIN", True, (0, 0, 0))
+        screen.blit(font_, (390, 85))
         if play_sound:
             mixer.Sound('win.wav').play()
 
-mouse_flag=0
+flag_mouse=0
 start_time=0
 screen.fill((210,210,210))
 draw_grid()
@@ -447,27 +446,27 @@ while True:
         if event.type==pygame.MOUSEBUTTONDOWN:
             if (event.button==1 and mouse_presses[2]) or (event.button==3 and mouse_presses[0]):
                 mouse_pos=pygame.mouse.get_pos()
-                chord_flag = True
-                if not game_over_flag and not clock_flag:
+                is_chord = True
+                if not is_gameover and not is_clock:
                     main_game()
-            elif mouse_presses[0] and not chord_flag:
+            elif mouse_presses[0] and not is_chord:
                 mouse_pos=pygame.mouse.get_pos()
                 if mouse_pos[1]>120:
-                    mouse_flag=mouse_flag+1
-                if mouse_flag==1:
+                    flag_mouse=flag_mouse+1
+                if flag_mouse==1:
                     start_time=time.time()
-                if not game_over_flag and not clock_flag:
+                if not is_gameover and not is_clock:
                     main_game()
-            elif mouse_presses[2] and not chord_flag:
+            elif mouse_presses[2] and not is_chord:
                 right_mouse_flag = True
                 mouse_pos=pygame.mouse.get_pos()
-                if not game_over_flag and not clock_flag:
+                if not is_gameover and not is_clock:
                     main_game()
     right_mouse_flag = False
-    chord_flag = False
-    if mouse_flag>=1:
+    is_chord = False
+    if flag_mouse>=1:
         clock()
-    if clock_flag:
+    if is_clock:
         game_over()
     board_update()
     pygame.display.update()
