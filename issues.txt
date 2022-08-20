@@ -1,0 +1,8 @@
+bugs that have come up
+should all be squashed, we're gucci
+
+clicking crashes
+chording crashes
+displays on wrong monitor
+numbers up to 8 in not many clicks
+squares become unclickable while and after moving a mine from under it
