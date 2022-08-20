@@ -26,9 +26,7 @@ start_time = 0
 total_mines = 99
 flag_count = total_mines
 def blowup(x, y):
-    global flag
-    global is_clock
-    global is_gameover
+    global flag, is_clock, is_gameover
     place_mine()
     screen.blit(mine_img, (x, y))
     flag = 10
@@ -114,15 +112,7 @@ def floodfill(a, b) -> None:
     if a - 1 >= 1 and a - 1 <= 30 and b - 1 >= 1 and b - 1 <= 16: floodfill_helper((a - 1, b - 1), (a - 2, b - 2))
     if a - 1 >= 1 and a - 1 <= 30 and b + 1 >= 1 and b + 1 <= 16: floodfill_helper((a - 1, b + 1), (a - 2, b))
 def game():
-    global array
-    global flag
-    global flag_count
-    global is_chord
-    global is_gameover
-    global is_clock
-    global is_mouse
-    global mouse_pos
-    global no_mine_array
+    global array, flag, flag_count, is_chord, is_gameover, is_clock, is_mouse, mouse_pos, no_mine_array
     a = 0
     blockSize = 30
     for x in range(0, WINDOW_WIDTH, blockSize):

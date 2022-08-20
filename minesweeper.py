@@ -38,9 +38,7 @@ total_mines = 99
 flag_count = total_mines
 
 def blowup(x, y) -> None:
-    global flag
-    global is_clock
-    global is_gameover
+    global flag, is_clock, is_gameover
     place_mine()
     screen.blit(mine_img, (x, y))
     flag = 10
